@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcryptjs'
 
 const userSchema = mongoose.Schema({
     name: {
@@ -7,7 +8,7 @@ const userSchema = mongoose.Schema({
     },
     email: {
         type: String,
-        requried: true,
+        required: true,
         unique: true,
         lowercase: true
     },
@@ -15,7 +16,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    profilPicture: {
+    profilePicture: {
         type: String,
         default: null
     },
@@ -36,6 +37,15 @@ const userSchema = mongoose.Schema({
         enum: ["user", "admin"],
         default: "user"
     }
-}, { timeStamps: true })
+}, { timestamps: true })
+
+userSchema.pre("save", async function () {
+
+    if (!this.isModified("password")) {//this is to check that is password is already hashed or not means when we will update userProfile we should not rehash the password which can break login logic
+        return
+    }
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+})
 
 export const User = mongoose.model("user", userSchema) 
