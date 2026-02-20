@@ -14,7 +14,8 @@ const userSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     profilePicture: {
         type: String,
@@ -39,6 +40,7 @@ const userSchema = mongoose.Schema({
     }
 }, { timestamps: true })
 
+// mongoose built in hook
 userSchema.pre("save", async function () {
 
     if (!this.isModified("password")) {//this is to check that is password is already hashed or not means when we will update userProfile we should not rehash the password which can break login logic

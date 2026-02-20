@@ -1,6 +1,7 @@
 import { User } from "../../Models/UserModel.js"
 import asyncHandler from 'express-async-handler'
 import generateJWT from "../../utils/generateJWT.js"
+import bcrypt from "bcryptjs"
 
 // POST
 // @desc Register User
@@ -29,7 +30,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     if (user) {
         res.status(201).json({
-            _id: user.id,
+            _id: user._id,
             name: user.name,
             email: user.email,
             token: generateJWT(user._id)
@@ -46,10 +47,31 @@ export const registerUser = asyncHandler(async (req, res) => {
 // @route /api/users/login
 // @access Public
 
-export const loginUser = (req, res) => {
-    try {
-        res.status(200).json({ message: "User Logged in Successfully!" })
-    } catch (error) {
-        res.status(500).json({ message: "Server Error" })
+export const loginUser = asyncHandler(async (req, res) => {
+    const { email, password } = req.body
+
+    if (!email || !password) {
+        res.status(400)
+        throw new Error("All fields are required")
     }
-}
+
+    const user = await User.findOne({ email }).select("+password")
+
+    if (!user) {
+        res.status(401)
+        throw new Error("Invalid Credential")
+    }
+    const isMatch = await bcrypt.compare(password, user.password)//first plain password then hashed password
+
+    if (!isMatch) {
+        res.status(401)
+        throw new Error("Invalid Credential")
+    }
+
+    res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        token: generateJWT(user._id)
+    })
+})
