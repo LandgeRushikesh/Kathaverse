@@ -28,18 +28,17 @@ export const registerUser = asyncHandler(async (req, res) => {
         password
     })
 
-    if (user) {
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            token: generateJWT(user._id)
-        })
-    }
-    else {
+    if (!user) {
         res.status(400)
         throw new Error("Invalid User Data")
     }
+
+    res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        token: generateJWT(user._id)
+    })
 })
 
 // POST
@@ -59,13 +58,13 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     if (!user) {
         res.status(401)
-        throw new Error("Invalid Credential")
+        throw new Error("Invalid credentials")
     }
     const isMatch = await bcrypt.compare(password, user.password)//first plain password then hashed password
 
     if (!isMatch) {
         res.status(401)
-        throw new Error("Invalid Credential")
+        throw new Error("Invalid credentials")
     }
 
     res.status(200).json({
