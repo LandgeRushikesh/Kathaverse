@@ -1,5 +1,6 @@
 import express from 'express'
-import { loginUser, registerUser } from '../Controller/UserControllers/UserControllers.js';
+import { getMe, loginUser, registerUser } from '../Controller/UserControllers/UserControllers.js';
+import { protect } from '../middleware/AuthMiddleware.js';
 
 const Route = express.Router()
 
@@ -8,6 +9,8 @@ Route.post('/register', registerUser)
 
 // Login User
 Route.post('/login', loginUser)
+
+Route.get("/me", protect, getMe)
 
 export default Route;
 

@@ -74,3 +74,9 @@ export const loginUser = asyncHandler(async (req, res) => {
         token: generateJWT(user._id)
     })
 })
+
+export const getMe = (req, res) => {
+    res.status(201).json({
+        message: req.user
+    })
+} 
