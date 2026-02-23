@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler'
 import { Story } from '../../Models/StoryModel.js'
 import { Comment } from '../../Models/CommentModel.js'
 
-// @route POST /api/stories/:id/comment
+// @route POST /api/stories/:id/comments
 // @desc add comment
 // @access Private
 
@@ -68,7 +68,7 @@ export const getAllComments = asyncHandler(async (req, res) => {
     })
 })
 
-// @route DELETE /api/stories/comment/:id
+// @route DELETE /api/comment/:id
 // @desc delete particular comment
 // @access Private
 
@@ -106,4 +106,41 @@ export const deleteComment = asyncHandler(async (req, res) => {
         message: "Comment Deleted Successfully",
         commentCount: updatedStory.commentCount
     })
+})
+
+// @route PUT /api/comments/:id
+// @desc Update particular comment
+// @access Private
+
+export const updateComment = asyncHandler(async (req, res) => {
+    const commentId = req.params.id
+    const userId = req.user._id
+
+    const comment = await Comment.findById(commentId)
+
+    // Check whether comment exists
+    if (!comment) {
+        res.status(404)
+        throw new Error("Comment not found")
+    }
+
+    // check if user is allowed to update comment
+    if (comment.user.toString() !== userId.toString()) {
+        res.status(403)
+        throw new Error("You are not allowed to update this comment")
+    }
+
+    const content = req.body.content?.trim()
+
+    if (!content) {
+        res.status(400)
+        throw new Error("Please add updated comment")
+    }
+    const updatedComment = await Comment.findByIdAndUpdate(
+        commentId,
+        { content: content },
+        { returnDocument: "after" }
+    )
+
+    res.status(200).json(updatedComment)
 })

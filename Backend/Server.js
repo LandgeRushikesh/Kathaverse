@@ -1,6 +1,7 @@
 import express from 'express'
 import UserRoute from './Routes/UserRoutes.js'
 import StoryRoute from "./Routes/StoryRoutes.js"
+import CommentRoute from "./Routes/CommentRoutes.js"
 import ConnectDB from './DB/Config.js';
 import { ErrorHandler } from './middleware/ErrorHandler.js';
 
@@ -18,6 +19,9 @@ app.use('/api/users', UserRoute)
 
 // Story Routes
 app.use('/api/stories', StoryRoute)
+
+// Comment Routes
+app.use('/api/comments', CommentRoute)
 
 // Error Handler Middleware
 app.use(ErrorHandler)
