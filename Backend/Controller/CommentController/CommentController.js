@@ -66,4 +66,44 @@ export const getAllComments = asyncHandler(async (req, res) => {
         comments: comments,
         totalComments: comments.length
     })
-}) 
+})
+
+// @route DELETE /api/stories/comment/:id
+// @desc delete particular comment
+// @access Private
+
+export const deleteComment = asyncHandler(async (req, res) => {
+    const commentId = req.params.id
+    const userId = req.user._id
+
+    const comment = await Comment.findById(commentId).select("user story")
+
+    // Check if comment exists
+    if (!comment) {
+        res.status(404)
+        throw new Error("Comment not found")
+    }
+
+    // Check if user is allowed to delete this comment
+    if (comment.user.toString() !== userId.toString()) {
+        res.status(403)
+        throw new Error("You are not allowed to delete this comment")
+    }
+
+    // Delete comment
+    await Comment.findByIdAndDelete(commentId)
+    // as we have already fetch the comment we can also do like below
+    // await comment.deleteOne()
+
+    // update comment count in  story
+    const updatedStory = await Story.findByIdAndUpdate(
+        comment.story,
+        { $inc: { commentCount: -1 } },
+        { returnDocument: "after" }
+    )
+
+    res.status(200).json({
+        message: "Comment Deleted Successfully",
+        commentCount: updatedStory.commentCount
+    })
+})
