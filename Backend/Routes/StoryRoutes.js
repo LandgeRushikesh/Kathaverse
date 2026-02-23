@@ -2,7 +2,7 @@ import express from 'express'
 import { createStory, getAllStories, getOneStory, getStoriesOfParticularAuthor } from '../Controller/StoryController/StoryController.js'
 import { protect } from '../middleware/AuthMiddleware.js'
 import { toggleLike } from '../Controller/LikeController/LikeController.js'
-import { addComment, deleteComment, getAllComments, updateComment } from '../Controller/CommentController/CommentController.js'
+import { addComment, getAllComments } from '../Controller/CommentController/CommentController.js'
 
 const Router = express.Router()
 

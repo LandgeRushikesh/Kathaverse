@@ -1,16 +1,18 @@
 import express from 'express'
-import { getMe, loginUser, registerUser } from '../Controller/UserControllers/UserControllers.js';
+import { loginUser, registerUser } from '../Controller/UserControllers/UserControllers.js';
 import { protect } from '../middleware/AuthMiddleware.js';
+import { toggleFollowing } from '../Controller/FollowController/FollowController.js';
 
-const Route = express.Router()
+const Router = express.Router()
 
 // Register User
-Route.post('/register', registerUser)
+Router.post('/register', registerUser)
 
 // Login User
-Route.post('/login', loginUser)
+Router.post('/login', loginUser)
 
-Route.get("/me", protect, getMe)
+// Toggle Following
+Router.post("/:id/follow", protect, toggleFollowing)
 
-export default Route;
+export default Router;
 
