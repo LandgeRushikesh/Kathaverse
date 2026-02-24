@@ -13,7 +13,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 
     if (!isValidObjectId(userId)) {
         res.status(400)
-        throw new Error("Valid userId is required")
+        throw new Error("Invalid user ID")
     }
 
     const profile = await User.findById(userId).select("name profilePicture bio followerCount followingCount createdAt").lean()//using lean() this will convert it into plain JS object from mongoDB object
@@ -48,4 +48,54 @@ export const getProfile = asyncHandler(async (req, res) => {
     profile.isFollowing = isFollowing
 
     res.status(200).json(profile)
+})
+
+// @route GET /api/users/:id/followers
+// @desc get all followers of the particular user
+// @access Public
+
+export const getFollowers = asyncHandler(async (req, res) => {
+    const userId = req.params.id
+
+    if (!isValidObjectId(userId)) {
+        res.status(400)
+        throw new Error("Invalid user ID")
+    }
+
+    const user = await User.exists({ _id: userId })
+
+    if (!user) {
+        res.status(404)
+        throw new Error("User not found")
+    }
+
+    const followers = await Follow.find({ following: userId }).populate("follower", "name profilePicture")
+    // Now this returning overall follow document and frontend only needs follower so now we will just extract that
+    const followerUsers = followers.map((f) => f.follower)
+    res.status(200).json(followerUsers)
+})
+
+// @route GET /api/users/:id/following
+// @desc get following of the particular user
+// @access Public
+
+export const getFollowing = asyncHandler(async (req, res) => {
+    const userId = req.params.id
+
+    if (!isValidObjectId(userId)) {
+        res.status(400)
+        throw new Error("Invalid user ID")
+    }
+
+    const user = await User.exists({ _id: userId })
+
+    if (!user) {
+        res.status(404)
+        throw new Error("User not found")
+    }
+
+    const following = await Follow.find({ follower: userId }).populate("following", "name profilePicture")
+    // Now this returning overall follow document and frontend only needs following so now we will just extract that
+    const followingUsers = following.map((f) => f.following)
+    res.status(200).json(followingUsers)
 })

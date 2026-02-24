@@ -3,7 +3,7 @@ import { loginUser, registerUser } from '../Controller/UserControllers/UserContr
 import { protect } from '../middleware/AuthMiddleware.js';
 import { toggleFollowing } from '../Controller/FollowController/FollowController.js';
 import optionalAuth from '../middleware/OptionalAuth.js';
-import { getProfile } from '../Controller/ProfileController/ProfileController.js';
+import { getFollowers, getFollowing, getProfile } from '../Controller/ProfileController/ProfileController.js';
 
 const Router = express.Router()
 
@@ -18,6 +18,12 @@ Router.post("/:id/follow", protect, toggleFollowing)
 
 // Get Profile
 Router.get("/:id", optionalAuth, getProfile)
+
+// Get Followers List
+Router.get("/:id/followers", getFollowers)
+
+// Get Following List
+Router.get("/:id/following", getFollowing)
 
 export default Router;
 
