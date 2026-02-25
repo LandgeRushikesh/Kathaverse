@@ -6,9 +6,17 @@ import { Story } from '../../Models/StoryModel.js'
 // @method GET
 // @access Public
 export const getAllStories = asyncHandler(async (req, res) => {
-    const stories = await Story.find().select("title overview author coverImage category likeCount createdAt").sort({ createdAt: -1 }).populate("author", "name profilePicture")
+    let stories = await Story.find().select("title overview author coverImage category likeCount createdAt").sort({ createdAt: -1 }).populate("author", "name profilePicture").lean()
+    // lean() will convert mongoDB object to JS plain object
     // this will always return an empty array if we didn't find any story
 
+    stories = stories.map((story) => (
+        {
+            ...story,
+            isLiked: false
+        }
+    )
+    )
     res.status(200).json(stories)
 })
 

@@ -3,11 +3,12 @@ import { createStory, getAllStories, getOneStory, getStoriesOfParticularAuthor }
 import { protect } from '../middleware/AuthMiddleware.js'
 import { toggleLike } from '../Controller/LikeController/LikeController.js'
 import { addComment, getAllComments } from '../Controller/CommentController/CommentController.js'
+import optionalAuth from '../middleware/OptionalAuth.js'
 
 const Router = express.Router()
 
 // get all stories
-Router.get("/", getAllStories)
+Router.get("/", optionalAuth, getAllStories)
 
 // get all stories from Particular author
 Router.get("/user/:authorId", getStoriesOfParticularAuthor)
