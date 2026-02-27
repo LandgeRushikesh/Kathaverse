@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler'
 import { Story } from '../../Models/StoryModel.js'
 import { Like } from '../../Models/LikeModel.js'
+import { Follow } from '../../Models/FollowModel.js'
 
 // @route /api/stories/
 // @desc get all stroies
@@ -14,23 +15,32 @@ export const getAllStories = asyncHandler(async (req, res) => {
     if (!req.user) {
         stories = stories.map((story) => ({
             ...story,
-            isLiked: false
+            isLiked: false,
+            isFollowingAuthor: false
         })
         )
     }
     else {
         const storyIds = stories.map(story => story._id)
+        const authorIds = stories.map(story => story.author)
 
         const likeStories = await Like.find({
             user: req.user._id,
             story: { $in: storyIds }
         }).select("story").lean()
 
+        const following = await Follow.find({
+            follower: req.user._id,
+            following: { $in: authorIds }
+        }).select("author").lean()
+
         const likeStoryIds = new Set(likeStories.map(like => like.story.toString()))
+        const followingAuthorIds = new Set(following.map(follow => follow.author.toString()))
 
         stories = stories.map(story => ({
             ...story,
-            isLiked: likeStoryIds.has(story._id.toString())
+            isLiked: likeStoryIds.has(story._id.toString()),
+            isFollowingAuthor: followingAuthorIds.has(story.author.toString())
         }))
     }
     res.status(200).json(stories)
@@ -90,12 +100,14 @@ export const getOneStory = asyncHandler(async (req, res) => {
     }
     if (!req.user) {
         story.isLiked = false
+        story.isFollowingAuthor = false
     }
     else {
         const isLiked = await Like.exists({ user: req.user._id, story: story._id })
-        console.log(isLiked);
+        const isFollow = await Follow.exists({ follower: req.user._id, following: story.author._id })
 
         story.isLiked = isLiked ? true : false
+        story.isFollowingAuthor = !!isFollow
     }
     res.status(200).json(story)
 })
