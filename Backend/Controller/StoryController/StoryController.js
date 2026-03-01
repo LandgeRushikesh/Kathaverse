@@ -16,31 +16,32 @@ export const getAllStories = asyncHandler(async (req, res) => {
         stories = stories.map((story) => ({
             ...story,
             isLiked: false,
-            isFollowingAuthor: false
+            isFollowing: false
         })
         )
     }
     else {
         const storyIds = stories.map(story => story._id)
-        const authorIds = stories.map(story => story.author)
+        const authorIds = stories.map(story => story.author._id)
 
         const likeStories = await Like.find({
             user: req.user._id,
             story: { $in: storyIds }
         }).select("story").lean()
 
-        const following = await Follow.find({
+        const authorFollowers = await Follow.find({
             follower: req.user._id,
             following: { $in: authorIds }
-        }).select("author").lean()
+        }).select("following").lean()
+
 
         const likeStoryIds = new Set(likeStories.map(like => like.story.toString()))
-        const followingAuthorIds = new Set(following.map(follow => follow.author.toString()))
+        const followedAuthorIds = new Set(authorFollowers.map(f => f.following.toString()))
 
         stories = stories.map(story => ({
             ...story,
             isLiked: likeStoryIds.has(story._id.toString()),
-            isFollowingAuthor: followingAuthorIds.has(story.author.toString())
+            isFollowing: followedAuthorIds.has(story.author._id.toString())
         }))
     }
     res.status(200).json(stories)
@@ -62,12 +63,14 @@ export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
     if (!req.user) {
         stories = stories.map((story) => ({
             ...story,
-            isLiked: false
+            isLiked: false,
+            isFollowing: false
         })
         )
     }
     else {
         const storyIds = stories.map(story => story._id)
+        const isFollowing = await Follow.exists({ follower: req.user._id, following: authorId })
 
         const likeStories = await Like.find({
             user: req.user._id,
@@ -78,7 +81,8 @@ export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
 
         stories = stories.map(story => ({
             ...story,
-            isLiked: likeStoryIds.has(story._id.toString())
+            isLiked: likeStoryIds.has(story._id.toString()),
+            isFollowing: !!isFollowing
         }))
     }
 
@@ -100,14 +104,14 @@ export const getOneStory = asyncHandler(async (req, res) => {
     }
     if (!req.user) {
         story.isLiked = false
-        story.isFollowingAuthor = false
+        story.isFollowing = false
     }
     else {
         const isLiked = await Like.exists({ user: req.user._id, story: story._id })
         const isFollow = await Follow.exists({ follower: req.user._id, following: story.author._id })
 
-        story.isLiked = isLiked ? true : false
-        story.isFollowingAuthor = !!isFollow
+        story.isLiked = !!isLiked
+        story.isFollowing = !!isFollow
     }
     res.status(200).json(story)
 })
