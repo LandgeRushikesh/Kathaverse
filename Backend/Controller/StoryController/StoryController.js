@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler'
 import { Story } from '../../Models/StoryModel.js'
 import { Like } from '../../Models/LikeModel.js'
 import { Follow } from '../../Models/FollowModel.js'
+import { enrichStories } from '../../Services/StoryServices.js'
 
 // @route /api/stories/
 // @desc get all stroies
@@ -12,38 +13,7 @@ export const getAllStories = asyncHandler(async (req, res) => {
     // lean() will convert mongoDB object to JS plain object
     // this will always return an empty array if we didn't find any story
 
-    if (!req.user) {
-        stories = stories.map((story) => ({
-            ...story,
-            isLiked: false,
-            isFollowing: false
-        })
-        )
-    }
-    else {
-        const storyIds = stories.map(story => story._id)
-        const authorIds = stories.map(story => story.author._id)
-
-        const likeStories = await Like.find({
-            user: req.user._id,
-            story: { $in: storyIds }
-        }).select("story").lean()
-
-        const authorFollowers = await Follow.find({
-            follower: req.user._id,
-            following: { $in: authorIds }
-        }).select("following").lean()
-
-
-        const likeStoryIds = new Set(likeStories.map(like => like.story.toString()))
-        const followedAuthorIds = new Set(authorFollowers.map(f => f.following.toString()))
-
-        stories = stories.map(story => ({
-            ...story,
-            isLiked: likeStoryIds.has(story._id.toString()),
-            isFollowing: followedAuthorIds.has(story.author._id.toString())
-        }))
-    }
+    stories = await enrichStories(req.user, stories)
     res.status(200).json(stories)
 })
 
@@ -60,31 +30,7 @@ export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
         .populate("author", "name profilePicture")
         .lean()
 
-    if (!req.user) {
-        stories = stories.map((story) => ({
-            ...story,
-            isLiked: false,
-            isFollowing: false
-        })
-        )
-    }
-    else {
-        const storyIds = stories.map(story => story._id)
-        const isFollowing = await Follow.exists({ follower: req.user._id, following: authorId })
-
-        const likeStories = await Like.find({
-            user: req.user._id,
-            story: { $in: storyIds }
-        }).select("story").lean()
-
-        const likeStoryIds = new Set(likeStories.map(like => like.story.toString()))
-
-        stories = stories.map(story => ({
-            ...story,
-            isLiked: likeStoryIds.has(story._id.toString()),
-            isFollowing: !!isFollowing
-        }))
-    }
+    stories = await enrichStories(req.user, stories)
 
     res.status(200).json(stories)
 })
@@ -96,23 +42,14 @@ export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
 export const getOneStory = asyncHandler(async (req, res) => {
     const id = req.params.id
 
-    const story = await Story.findById(id).populate("author", "name profilePicture bio").lean()
+    let story = await Story.findById(id).populate("author", "name profilePicture bio").lean()
 
     if (!story) {
         res.status(404)
         throw new Error("Story not found")
     }
-    if (!req.user) {
-        story.isLiked = false
-        story.isFollowing = false
-    }
-    else {
-        const isLiked = await Like.exists({ user: req.user._id, story: story._id })
-        const isFollow = await Follow.exists({ follower: req.user._id, following: story.author._id })
 
-        story.isLiked = !!isLiked
-        story.isFollowing = !!isFollow
-    }
+    story = await enrichStories(req.user, story)
     res.status(200).json(story)
 })
 
@@ -137,7 +74,10 @@ export const createStory = asyncHandler(async (req, res) => {
         author: authorId
     })//if it fails it will directly throw an error so we don't need to check whether story is created or not
 
-    const reqStory = await Story.findById(story._id).select("title overview author category createdAt likeCount").populate("author", "name profilePicture")
-
+    let reqStory = await Story.findById(story._id)
+        .select("title overview author category createdAt likeCount")
+        .populate("author", "name profilePicture")
+        .lean()
+    reqStory = await enrichStories(req.user, reqStory)
     res.status(201).json(reqStory)
 })
