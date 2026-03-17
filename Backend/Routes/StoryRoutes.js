@@ -1,5 +1,5 @@
 import express from 'express'
-import { createStory, getAllStories, getOneStory, getStoriesOfParticularAuthor, updateStory } from '../Controller/StoryController/StoryController.js'
+import { createStory, deleteStory, getAllStories, getOneStory, getStoriesOfParticularAuthor, updateStory } from '../Controller/StoryController/StoryController.js'
 import { protect } from '../middleware/AuthMiddleware.js'
 import { toggleLike } from '../Controller/LikeController/LikeController.js'
 import { addComment, getAllComments } from '../Controller/CommentController/CommentController.js'
@@ -21,6 +21,9 @@ Router.post("/", protect, createStory)
 
 // Update story
 Router.put("/:id", protect, updateStory)
+
+// Delete story
+Router.delete("/:id", protect, deleteStory)
 
 // Like Route
 

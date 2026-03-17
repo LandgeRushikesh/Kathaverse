@@ -3,9 +3,10 @@ import { Story } from '../../Models/StoryModel.js'
 import { Like } from '../../Models/LikeModel.js'
 import { Follow } from '../../Models/FollowModel.js'
 import { enrichStories } from '../../Services/StoryServices.js'
+import { Comment } from '../../Models/CommentModel.js'
 
 // @route /api/stories/
-// @desc get all stroies
+// @desc get all stories
 // @method GET
 // @access Public
 export const getAllStories = asyncHandler(async (req, res) => {
@@ -14,11 +15,14 @@ export const getAllStories = asyncHandler(async (req, res) => {
     // this will always return an empty array if we didn't find any story
 
     stories = await enrichStories(req.user, stories)
-    res.status(200).json(stories)
+    res.status(200).json({
+        success: true,
+        data: stories
+    })
 })
 
 // @route /api/stories/
-// @desc get all stroies from particular author
+// @desc get all stories from particular author
 // @method GET
 // @access Public
 export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
@@ -32,7 +36,10 @@ export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
 
     stories = await enrichStories(req.user, stories)
 
-    res.status(200).json(stories)
+    res.status(200).json({
+        success: true,
+        data: stories
+    })
 })
 
 // @route /api/stories/:id
@@ -50,11 +57,14 @@ export const getOneStory = asyncHandler(async (req, res) => {
     }
 
     story = await enrichStories(req.user, story)
-    res.status(200).json(story)
+    res.status(200).json({
+        success: true,
+        data: story
+    })
 })
 
 // @route /api/stories/
-// @desc add stroy
+// @desc add story
 // @method POST
 // @access Private
 export const createStory = asyncHandler(async (req, res) => {
@@ -79,7 +89,10 @@ export const createStory = asyncHandler(async (req, res) => {
         .populate("author", "name profilePicture")
         .lean()
     reqStory = await enrichStories(req.user, reqStory)
-    res.status(201).json(reqStory)
+    res.status(201).json({
+        success: true,
+        data: reqStory
+    })
 })
 
 // @route /api/stories/:id
@@ -88,7 +101,7 @@ export const createStory = asyncHandler(async (req, res) => {
 // @access Private
 
 export const updateStory = asyncHandler(async (req, res) => {
-    const id = req.params.id
+    const { id } = req.params
 
     const story = await Story.findById(id)
 
@@ -108,7 +121,7 @@ export const updateStory = asyncHandler(async (req, res) => {
 
     if (title === undefined && content === undefined) {
         res.status(400)
-        throw new Error("Requires the field that you want to update")
+        throw new Error("No updatable fields provided")
     }
 
     if (title !== undefined) {
@@ -127,4 +140,46 @@ export const updateStory = asyncHandler(async (req, res) => {
         data: story
     })
 
+})
+
+
+// @route /api/stories/:id
+// @desc Delete Story
+// @method DELETE
+// @access Private
+
+export const deleteStory = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    const story = await Story.findById(id)
+
+    if (!story) {
+        res.status(404)
+        throw new Error("Story not found")
+    }
+
+    // Authorization
+    const authorId = req.user._id
+
+    if (story.author.toString() !== authorId.toString()) {
+        res.status(403)
+        throw new Error("Only author can delete story")
+    }
+
+    // This allow parallel excution of this cleanup tasks
+    await Promise.all([
+        // Delete all Comment of this story
+        Comment.deleteMany({ story: story._id }),
+        // Delete all Likes of this story
+        Like.deleteMany({ story: story._id })
+    ])
+
+    // Delete a story
+    await story.deleteOne()
+
+    res.status(200).json({
+        success: true,
+        message: "Story deleted successfully",
+        data: story
+    })
 })
