@@ -81,3 +81,50 @@ export const createStory = asyncHandler(async (req, res) => {
     reqStory = await enrichStories(req.user, reqStory)
     res.status(201).json(reqStory)
 })
+
+// @route /api/stories/:id
+// @desc Update Story
+// @method PUT
+// @access Private
+
+export const updateStory = asyncHandler(async (req, res) => {
+    const id = req.params.id
+
+    const story = await Story.findById(id)
+
+    if (!story) {
+        res.status(404)
+        throw new Error("Story not found")
+    }
+
+    const authorId = req.user._id
+
+    if (story.author.toString() !== authorId.toString()) {
+        res.status(403)
+        throw new Error("Only author can edit story")
+    }
+
+    const { title, content } = req.body
+
+    if (title === undefined && content === undefined) {
+        res.status(400)
+        throw new Error("Requires the field that you want to update")
+    }
+
+    if (title !== undefined) {
+        story.title = title
+    }
+
+    if (content !== undefined) {
+        story.content = content
+    }
+
+    await story.save()
+
+    res.status(200).json({
+        success: true,
+        message: "Story updated successfully",
+        data: story
+    })
+
+})

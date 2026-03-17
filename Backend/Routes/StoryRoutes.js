@@ -1,5 +1,5 @@
 import express from 'express'
-import { createStory, getAllStories, getOneStory, getStoriesOfParticularAuthor } from '../Controller/StoryController/StoryController.js'
+import { createStory, getAllStories, getOneStory, getStoriesOfParticularAuthor, updateStory } from '../Controller/StoryController/StoryController.js'
 import { protect } from '../middleware/AuthMiddleware.js'
 import { toggleLike } from '../Controller/LikeController/LikeController.js'
 import { addComment, getAllComments } from '../Controller/CommentController/CommentController.js'
@@ -18,6 +18,9 @@ Router.get("/:id", optionalAuth, getOneStory)
 
 // Create Story
 Router.post("/", protect, createStory)
+
+// Update story
+Router.put("/:id", protect, updateStory)
 
 // Like Route
 
