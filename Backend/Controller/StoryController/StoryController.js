@@ -10,14 +10,30 @@ import { Comment } from '../../Models/CommentModel.js'
 // @method GET
 // @access Public
 export const getAllStories = asyncHandler(async (req, res) => {
-    let stories = await Story.find().select("title overview author coverImage category likeCount createdAt").sort({ createdAt: -1 }).populate("author", "name profilePicture").lean()
-    // lean() will convert mongoDB object to JS plain object
-    // this will always return an empty array if we didn't find any story
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const skip = (page - 1) * limit
+    let [stories, totalDocuments] = await Promise.all([
+        Story.find().select("title overview author coverImage category likeCount createdAt").sort({ createdAt: -1 }).skip(skip).limit(limit).populate("author", "name profilePicture").lean(),
+        // lean() will convert mongoDB object to JS plain object
+        // this will always return an empty array if we didn't find any story
+
+        // Count pagination details
+        Story.countDocuments()
+    ])
+    const totalPages = Math.ceil(totalDocuments / limit)
+    const pagination = {
+        page: page,
+        limit: limit,
+        total: totalDocuments,
+        totalPages: totalPages
+    }
 
     stories = await enrichStories(req.user, stories)
     res.status(200).json({
         success: true,
-        data: stories
+        data: stories,
+        pagination: pagination
     })
 })
 
