@@ -11,7 +11,7 @@ const Router = express.Router()
 Router.get("/", optionalAuth, getAllStories)
 
 // get all stories from Particular author
-Router.get("/user/:authorId", optionalAuth, getStoriesOfParticularAuthor)
+Router.get("/users/:authorId", optionalAuth, getStoriesOfParticularAuthor)
 
 // get story by id
 Router.get("/:id", optionalAuth, getOneStory)

@@ -37,24 +37,42 @@ export const getAllStories = asyncHandler(async (req, res) => {
     })
 })
 
-// @route /api/stories/
+// @route /api/stories/users/:authorId
 // @desc get all stories from particular author
 // @method GET
 // @access Public
 export const getStoriesOfParticularAuthor = asyncHandler(async (req, res) => {
     const authorId = req.params.authorId
 
-    let stories = await Story.find({ author: authorId })
-        .select("title overview category coverImage likeCount createdAt author")
-        .sort({ createdAt: -1 })
-        .populate("author", "name profilePicture")
-        .lean()
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    let [stories, totalDocuments] = await Promise.all([
+        Story.find({ author: authorId })
+            .select("title overview category coverImage likeCount createdAt author")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate("author", "name profilePicture")
+            .lean(),
+
+        Story.countDocuments({ author: authorId })
+    ])
 
     stories = await enrichStories(req.user, stories)
+    const totalPages = Math.ceil(totalDocuments / limit)
+    const pagination = {
+        page: page,
+        limit: limit,
+        total: totalDocuments,
+        totalPages: totalPages
+    }
 
     res.status(200).json({
         success: true,
-        data: stories
+        data: stories,
+        pagination: pagination
     })
 })
 
