@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/AuthService";
+import { useAuth } from "../context/AuthContext";
 
 interface LoginFormData {
   email: string;
@@ -13,6 +14,7 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,20 +30,20 @@ const LoginPage = () => {
       setLoading(true);
       const res = await loginUser(formData.email, formData.password);
       console.log("User Logged In:", res);
+      const userData = {
+        _id: res._id,
+        name: res.name,
+        email: res.email,
+      };
 
       // store token
       localStorage.setItem("token", res.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          _id: res._id,
-          name: res.name,
-          email: res.email,
-        }),
-      );
+      localStorage.setItem("user", JSON.stringify(userData));
+      login(userData);
+
       navigate("/");
     } catch (error) {
-      console.log("Login Failed:", error);
+      console.error("Login Failed:", error);
       alert("Login Failed. Please check your credentials.");
     } finally {
       setLoading(false);
