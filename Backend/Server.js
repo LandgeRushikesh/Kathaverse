@@ -3,6 +3,7 @@ import UserRoute from './Routes/UserRoutes.js'
 import StoryRoute from "./Routes/StoryRoutes.js"
 import CommentRoute from "./Routes/CommentRoutes.js"
 import ConnectDB from './DB/Config.js';
+import cors from "cors"
 import { ErrorHandler } from './middleware/ErrorHandler.js';
 
 const app = express()
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 8000
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.use(cors())
 
 // User Routes
 app.use('/api/users', UserRoute)
