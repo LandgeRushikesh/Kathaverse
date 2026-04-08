@@ -19,8 +19,13 @@ const Navbar = () => {
         </NavLink>
         {isAuthenticated ? (
           <>
-            <span>{user.name}</span>
-            <button onClick={logout}>Logout</button>
+            <span className="font-medium text-gray-600">{user.name}</span>
+            <button
+              onClick={logout}
+              className="text-red-700 hover:text-red-500"
+            >
+              Logout
+            </button>
           </>
         ) : (
           <>
