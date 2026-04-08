@@ -9,7 +9,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  let limit: number = 5;
+  const limit: number = 5;
 
   const fetchStories = async () => {
     try {
@@ -41,16 +41,36 @@ const HomePage = () => {
     fetchStories();
   }, [currPage]);
 
+  const isPrevDisabled = currPage === 1;
+  const isNextDisabled = currPage === totalPages;
+
   return (
     <>
       <div>
         {loading ? <h1>Loading....</h1> : <StoryList stories={stories} />}
       </div>
-      <div className="btn flex justify-around">
-        <button onClick={handlePrev} className="cursor-pointer">
+      <div className="flex justify-center gap-6 mt-6">
+        <button
+          disabled={isPrevDisabled}
+          onClick={handlePrev}
+          className={`px-4 py-2 rounded-md transition ${
+            isPrevDisabled
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
+        >
           Prev
         </button>
-        <button onClick={handleNext} className="cursor-pointer">
+
+        <button
+          disabled={isNextDisabled}
+          onClick={handleNext}
+          className={`px-4 py-2 rounded-md transition ${
+            isNextDisabled
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
+        >
           Next
         </button>
       </div>
