@@ -4,7 +4,7 @@ interface AuthContextType {
   user: any;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  login: (userData: any) => void;
+  login: (user: any) => void;
   logout: () => void;
 }
 
@@ -15,7 +15,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const isAuthenticated = !!user;
   // login user
-  const login = (userData: any) => {
+  const login = (user: any) => {
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    };
+
+    // store token
+    localStorage.setItem("token", user.token);
+    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
   // Logout logic

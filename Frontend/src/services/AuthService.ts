@@ -13,3 +13,22 @@ export const loginUser = async (email: string, password: string) => {
     throw error;
   }
 };
+
+export const registerUser = async (
+  name: string,
+  email: string,
+  password: string,
+) => {
+  try {
+    const res = await axios.post("http://localhost:5000/api/users/register", {
+      name,
+      email,
+      password,
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("Registration Error:", error);
+    throw error;
+  }
+};

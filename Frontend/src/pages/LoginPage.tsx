@@ -30,16 +30,8 @@ const LoginPage = () => {
       setLoading(true);
       const res = await loginUser(formData.email, formData.password);
       console.log("User Logged In:", res);
-      const userData = {
-        _id: res._id,
-        name: res.name,
-        email: res.email,
-      };
 
-      // store token
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(userData));
-      login(userData);
+      login(res);
 
       navigate("/");
     } catch (error) {
