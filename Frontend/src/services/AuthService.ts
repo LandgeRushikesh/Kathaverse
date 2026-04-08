@@ -9,7 +9,7 @@ export const loginUser = async (email: string, password: string) => {
 
     return res.data;
   } catch (error) {
-    console.log("Login Error:", error);
+    console.error("Login Error:", error);
     throw error;
   }
 };
