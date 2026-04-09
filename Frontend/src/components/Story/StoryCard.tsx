@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Story } from "../../Types/Story";
+import { toggleLike } from "../../services/LikeService";
 
 interface storyCardProps {
   story: Story;
@@ -8,8 +9,14 @@ interface storyCardProps {
 const StoryCard = ({ story }: storyCardProps) => {
   const [isLiked, setIsLiked] = useState<boolean>(story.isLiked);
   const [likeCount, setLikeCount] = useState<number>(story.likeCount);
+  const [isLiking, setIsLiking] = useState<boolean>(false);
 
-  const handleLike = () => {
+  const handleLike = async () => {
+    setIsLiking(true);
+    const id = story._id;
+    // Previous state
+    const prevLiked: boolean = isLiked;
+    const prevCount: number = likeCount;
     // Toggle like
     setIsLiked((prevIsLiked) => {
       const newIsLiked = !prevIsLiked;
@@ -17,7 +24,26 @@ const StoryCard = ({ story }: storyCardProps) => {
 
       return newIsLiked;
     });
+
+    try {
+      const res = await toggleLike(id);
+
+      setIsLiked(res.isLiked);
+      setLikeCount(res.likeCount);
+    } catch (error) {
+      console.error("Failed to like:", error);
+      setIsLiked(prevLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setIsLiking(false);
+    }
   };
+
+  // this is for when prop will change as react doesn't reinitialized states when re-rendered
+  useEffect(() => {
+    setIsLiked(story.isLiked);
+    setLikeCount(story.likeCount);
+  }, [story.isLiked, story.likeCount]);
 
   return (
     <div className="bg-white rounded-lg shadow-md max-w-sm mx-auto hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full">
@@ -56,8 +82,9 @@ const StoryCard = ({ story }: storyCardProps) => {
             {/* Like Button & Count */}
             <button
               onClick={handleLike}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-red-50 active:scale-95"
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-red-50 active:scale-95 ${isLiking ? "cursor-not-allowed" : "cursor-pointer"}`}
               aria-label={isLiked ? "Unlike story" : "Like story"}
+              disabled={isLiking}
             >
               {/* Heart Icon */}
               <svg

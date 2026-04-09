@@ -34,7 +34,7 @@ export const toggleLike = asynHandler(async (req, res) => {
         )
 
         return res.status(200).json({
-            liked: false,
+            isLiked: false,
             likeCount: updatedStory.likeCount
         })
     }
@@ -51,7 +51,7 @@ export const toggleLike = asynHandler(async (req, res) => {
     )
 
     res.status(200).json({
-        liked: true,
+        isLiked: true,
         likeCount: updatedStory.likeCount
     })
 })
