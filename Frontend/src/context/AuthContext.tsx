@@ -1,29 +1,30 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import type { AuthResponse, User } from "../Types/Auth";
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  login: (user: any) => void;
+  login: (data: AuthResponse) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const isAuthenticated = !!user;
   // login user
-  const login = (user: any) => {
-    const userData = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
+  const login = (data: AuthResponse) => {
+    const userData: User = {
+      _id: data._id,
+      name: data.name,
+      email: data.email,
     };
 
     // store token
-    localStorage.setItem("token", user.token);
+    localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
@@ -36,11 +37,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Auto Login - when website refreshes user become null so we need to set user from localStorage when component is mounted
   useEffect(() => {
-    let storeduser = localStorage.getItem("user");
+    const storeduser = localStorage.getItem("user");
 
     if (storeduser) {
-      storeduser = JSON.parse(storeduser);
-      setUser(storeduser);
+      const parsedUser: User = JSON.parse(storeduser);
+      setUser(parsedUser);
     }
     setIsAuthLoading(false);
   }, []);
