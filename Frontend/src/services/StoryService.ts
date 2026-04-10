@@ -1,8 +1,8 @@
-import axios from "axios";
+import { api } from "./Api";
 
 export const getAllStories = async (page: number, limit: number) => {
   try {
-    const res = await axios.get("http://localhost:5000/api/stories", {
+    const res = await api.get("/stories", {
       params: { page, limit },
     });
 

@@ -1,17 +1,8 @@
-import axios from "axios";
+import { api } from "./Api";
 
 export const toggleLike = async (id: string) => {
-  const token = localStorage.getItem("token");
   try {
-    const res = await axios.post(
-      `http://localhost:5000/api/stories/${id}/like`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    const res = await api.post(`/stories/${id}/like`);
 
     return res.data;
   } catch (error) {
