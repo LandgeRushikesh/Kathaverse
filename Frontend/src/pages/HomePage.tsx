@@ -46,7 +46,7 @@ const HomePage = () => {
 
   return (
     <>
-      <div className="max-h-full overflow-y-scroll">
+      <div className=" max-h-full overflow-y-auto hide-scrollbar">
         {loading ? <h1>Loading....</h1> : <StoryList stories={stories} />}
       </div>
       <div className="flex justify-center gap-6 mt-6">
