@@ -5,16 +5,18 @@ import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/layout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import CreateStoryPage from "../pages/CreateStoryPage";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
+        <Route index element={<HomePage />} />
         <Route
-          index
+          path="create-story"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <CreateStoryPage />
             </ProtectedRoute>
           }
         />
