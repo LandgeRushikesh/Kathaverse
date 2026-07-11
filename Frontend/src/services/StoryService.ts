@@ -1,3 +1,4 @@
+import type { CreateStoryRequest } from "../Types/Story";
 import { api } from "./Api";
 
 export const getAllStories = async (page: number, limit: number) => {
@@ -13,8 +14,11 @@ export const getAllStories = async (page: number, limit: number) => {
   }
 };
 
-export const createStory = async () => {
+export const createStory = async (storyData: CreateStoryRequest) => {
   try {
+    const res = await api.post("/stories", storyData);
+
+    return res.data;
   } catch (error) {
     console.error("Error occurred:", error);
     throw error;

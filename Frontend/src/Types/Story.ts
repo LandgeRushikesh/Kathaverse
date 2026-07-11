@@ -16,3 +16,11 @@ export interface Story {
   coverImage: null;
   category: string;
 }
+
+export interface CreateStoryRequest {
+  title: string;
+  overview: string;
+  content: string;
+  category: string;
+  coverImage: string | null;
+}

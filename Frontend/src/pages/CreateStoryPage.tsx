@@ -1,4 +1,66 @@
+import { useState } from "react";
+import type { CreateStoryRequest } from "../Types/Story";
+import { createStory } from "../services/StoryService";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 const CreateStoryPage = () => {
+  const [storyData, setStoryData] = useState<CreateStoryRequest>({
+    title: "",
+    overview: "",
+    content: "",
+    category: "",
+    coverImage: "",
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  const handlePublish = async () => {
+    try {
+      if (!storyData.title.trim()) {
+        toast.error("Title is required");
+        return;
+      }
+      if (!storyData.overview.trim()) {
+        toast.error("Overview is required");
+        return;
+      }
+      if (!storyData.content.trim()) {
+        toast.error("Content is required");
+        return;
+      }
+      if (!storyData.category.trim()) {
+        toast.error("Category is required");
+        return;
+      }
+      setIsLoading(true);
+      await createStory(storyData);
+
+      toast.success("Story Published Successfully...");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 700);
+    } catch (error) {
+      console.error("Error Occured:", error);
+      toast.error("Failed to publish Story");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value } = e.target;
+
+    setStoryData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   return (
     <div className="max-h-full overflow-y-auto hide-scrollbar bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -29,6 +91,10 @@ const CreateStoryPage = () => {
                 type="text"
                 placeholder="Enter story title"
                 className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                name="title"
+                value={storyData.title}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -47,6 +113,10 @@ const CreateStoryPage = () => {
                 placeholder="Write a short overview of your story"
                 rows={4}
                 className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                name="overview"
+                value={storyData.overview}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -62,6 +132,10 @@ const CreateStoryPage = () => {
                 placeholder="Write your story here..."
                 rows={12}
                 className="w-full rounded-3xl border border-slate-300 bg-white px-5 py-4 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                name="content"
+                value={storyData.content}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -76,12 +150,16 @@ const CreateStoryPage = () => {
                 <select
                   id="story-category"
                   className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  name="category"
+                  value={storyData.category}
+                  onChange={handleChange}
                 >
-                  <option>Technology</option>
-                  <option>Fiction</option>
-                  <option>Motivation</option>
-                  <option>Education</option>
-                  <option>Lifestyle</option>
+                  <option value="">Select Category</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Fiction">Fiction</option>
+                  <option value="Motivation">Motivation</option>
+                  <option value="Education">Education</option>
+                  <option value="Lifestyle">Lifestyle</option>
                 </select>
               </div>
 
@@ -112,9 +190,11 @@ const CreateStoryPage = () => {
               </div>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 cursor-pointer"
+                disabled={isLoading}
+                className={`inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-slate-300 ${isLoading ? "bg-slate-300 text-slate-600 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-slate-800"}`}
+                onClick={handlePublish}
               >
-                Publish Story
+                {isLoading ? "Publishing..." : "Publish Story"}
               </button>
             </div>
           </div>
