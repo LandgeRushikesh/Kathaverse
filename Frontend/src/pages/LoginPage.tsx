@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/AuthService";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 interface LoginFormData {
   email: string;
@@ -29,14 +30,13 @@ const LoginPage = () => {
     try {
       setLoading(true);
       const res = await loginUser(formData.email, formData.password);
-      console.log("User Logged In:", res);
+      toast.success(`Welcome back, ${res.name.split(" ")[0]}! 👋`);
 
       login(res);
 
       navigate("/");
     } catch (error) {
-      console.error("Login Failed:", error);
-      alert("Login Failed. Please check your credentials.");
+      toast.error("Login Failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ const LoginPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full text-center text-white font-semibold py-2 rounded-md mb-4 transition ${loading ? "cursor-not-allowed bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          className={`w-full text-center text-white font-semibold py-2 rounded-md mb-4 transition cursor-pointer ${loading ? "cursor-not-allowed bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
         >
           {loading ? "Signing In..." : "Sign In"}
         </button>

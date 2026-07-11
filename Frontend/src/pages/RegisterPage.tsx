@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/AuthService";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 interface RegisterFormData {
   name: string;
@@ -32,17 +33,16 @@ const RegisterPage = () => {
     try {
       setLoading(true);
       const { name, email, password } = formData;
-      console.log(name, " ", email, " ", password);
 
       const res = await registerUser(name, email, password);
-      console.log("User Registered successfully:", res);
+      toast.success(`🎉 Welcome, ${res.name.split(" ")[0]}!
+Your account has been created successfully.`);
 
       login(res);
 
       navigate("/");
     } catch (error) {
-      console.error("Failed to register:", error);
-      alert("Registration Failed. Please check your credentials.");
+      toast.error("Error Occured while Registering...");
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ const RegisterPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full text-center text-white font-semibold py-2 rounded-md mb-4 transition ${loading ? "cursor-not-allowed bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          className={`w-full text-center text-white font-semibold py-2 rounded-md mb-4 transition cursor-pointer ${loading ? "cursor-not-allowed bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
