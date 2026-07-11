@@ -1,10 +1,11 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   HiHome,
   HiPlusCircle,
   HiUser,
   HiUsers,
   HiOutlineLogout,
+  HiOutlineLogin,
 } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 
@@ -29,7 +30,9 @@ const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     : "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors duration-150";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
 
   const initials = user?.name
     ? user.name
@@ -65,28 +68,38 @@ const Sidebar = () => {
       </nav>
 
       <div className="border-t border-gray-200 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-base font-semibold text-white">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">
-              {user?.name ?? "Guest User"}
-            </p>
-            <p className="truncate text-xs text-slate-500">
-              {user?.email ?? "guest@kathaverse.com"}
-            </p>
-          </div>
-        </div>
+        {isAuthenticated ? (
+          <>
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-base font-semibold text-white">
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">
+                  {user?.name}
+                </p>
+                <p className="truncate text-xs text-slate-500">{user?.email}</p>
+              </div>
+            </div>
 
-        <button
-          type="button"
-          onClick={logout}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-        >
-          <HiOutlineLogout className="text-base" />
-          Logout
-        </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            >
+              <HiOutlineLogout className="text-base" />
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+          >
+            <HiOutlineLogin className="text-base" />
+            {isLoginPage ? "Already on login page" : "Login"}
+          </Link>
+        )}
       </div>
     </aside>
   );

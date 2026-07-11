@@ -12,3 +12,11 @@ export const getAllStories = async (page: number, limit: number) => {
     throw error;
   }
 };
+
+export const createStory = async () => {
+  try {
+  } catch (error) {
+    console.error("Error occurred:", error);
+    throw error;
+  }
+};

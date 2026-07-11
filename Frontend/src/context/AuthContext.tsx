@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { AuthResponse, User } from "../Types/Auth";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const isAuthenticated = !!user;
+  const navigate = useNavigate();
   // login user
   const login = (data: AuthResponse) => {
     const userData: User = {
@@ -33,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    navigate("/login");
   };
 
   // Auto Login - when website refreshes user become null so we need to set user from localStorage when component is mounted
