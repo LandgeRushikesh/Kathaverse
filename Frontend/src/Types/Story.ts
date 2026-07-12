@@ -22,5 +22,5 @@ export interface CreateStoryRequest {
   overview: string;
   content: string;
   category: string;
-  coverImage: string | null;
+  coverImage: string;
 }

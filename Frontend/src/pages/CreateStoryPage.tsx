@@ -3,6 +3,7 @@ import type { CreateStoryRequest } from "../Types/Story";
 import { createStory } from "../services/StoryService";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { uploadImage } from "../services/UploadImageService";
 
 const CreateStoryPage = () => {
   const [storyData, setStoryData] = useState<CreateStoryRequest>({
@@ -13,6 +14,14 @@ const CreateStoryPage = () => {
     coverImage: "",
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadStatus, setUploadStatus] = useState<{
+    message: string | null;
+    isError: boolean;
+  }>({
+    message: null,
+    isError: false,
+  });
   const navigate = useNavigate();
 
   const handlePublish = async () => {
@@ -31,6 +40,10 @@ const CreateStoryPage = () => {
       }
       if (!storyData.category.trim()) {
         toast.error("Category is required");
+        return;
+      }
+      if (!storyData.coverImage.trim()) {
+        toast.error("CoverImage is required");
         return;
       }
       setIsLoading(true);
@@ -60,6 +73,39 @@ const CreateStoryPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+
+      if (!file) {
+        return;
+      }
+      setUploadStatus({
+        message: "Uploading Image...",
+        isError: false,
+      });
+      setIsUploading(true);
+      const res = await uploadImage(file);
+      setStoryData((prev) => ({
+        ...prev,
+        coverImage: res.imageUrl,
+      }));
+      setUploadStatus({
+        message: "Image uploaded successfully",
+        isError: false,
+      });
+    } catch (error) {
+      toast.error("Failed to upload Image");
+      console.error("Failed to upload image:", error);
+      setUploadStatus({
+        message: "Failed to upload image",
+        isError: true,
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
   return (
     <div className="max-h-full overflow-y-auto hide-scrollbar bg-slate-50 py-6 px-4 sm:px-6 lg:px-8">
@@ -165,17 +211,26 @@ const CreateStoryPage = () => {
 
               <div className="space-y-3">
                 <label
-                  htmlFor="cover-image-url"
+                  htmlFor="cover-image"
                   className="block text-sm font-medium text-slate-700"
                 >
-                  Cover Image URL
+                  Cover Image
                 </label>
                 <input
-                  id="cover-image-url"
-                  type="url"
-                  placeholder="Paste cover image URL"
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  id="cover-image"
+                  type="file"
+                  accept="image/*" //This tells the browser to show only image files in the file picker.
+                  disabled={isUploading}
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer"
+                  onChange={handleImageChange}
                 />
+                {uploadStatus.message && (
+                  <p
+                    className={`mt-2 text-sm ${uploadStatus.isError ? "text-red-500" : "text-green-600"}`}
+                  >
+                    {uploadStatus.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -190,11 +245,15 @@ const CreateStoryPage = () => {
               </div>
               <button
                 type="button"
-                disabled={isLoading}
-                className={`inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-slate-300 ${isLoading ? "bg-slate-300 text-slate-600 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-slate-800"}`}
+                disabled={isLoading || isUploading}
+                className={`inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-slate-300 ${isLoading || isUploading ? "bg-slate-300 text-slate-600 cursor-not-allowed" : "bg-slate-900 text-white hover:bg-slate-800"}`}
                 onClick={handlePublish}
               >
-                {isLoading ? "Publishing..." : "Publish Story"}
+                {isLoading
+                  ? "Publishing..."
+                  : isUploading
+                    ? "Uploading Image..."
+                    : "Publish Story"}
               </button>
             </div>
           </div>
