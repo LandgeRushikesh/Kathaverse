@@ -5,11 +5,13 @@ import { Outlet } from "react-router-dom";
 const MainLayout = () => {
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="flex">
+      <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 flex flex-col min-h-0">
+
+        <div className="flex flex-1 flex-col min-h-0">
           <LayoutHeader />
-          <main className="p-6 flex-1 max-h-[calc(100vh-10rem)]">
+
+          <main className="hide-scrollbar flex-1 min-h-0 overflow-y-auto p-6">
             <Outlet />
           </main>
         </div>

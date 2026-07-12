@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import type { Story } from "../../Types/Story";
 import { toggleLike } from "../../services/LikeService";
+import { useNavigate } from "react-router-dom";
 
 interface storyCardProps {
   story: Story;
 }
 
 const StoryCard = ({ story }: storyCardProps) => {
+  const navigate = useNavigate();
+
   const [isLiked, setIsLiked] = useState<boolean>(story.isLiked);
   const [likeCount, setLikeCount] = useState<number>(story.likeCount);
   const [isLiking, setIsLiking] = useState<boolean>(false);
@@ -45,8 +48,15 @@ const StoryCard = ({ story }: storyCardProps) => {
     setLikeCount(story.likeCount);
   }, [story.isLiked, story.likeCount]);
 
+  const handleNavigation = (id: string) => {
+    navigate(`/story/${id}`);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md max-w-sm mx-auto hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full">
+    <div
+      onClick={() => handleNavigation(story._id)}
+      className="bg-white rounded-lg shadow-md max-w-sm mx-auto hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+    >
       {/* Cover Image */}
       <div className="relative overflow-hidden bg-gray-200">
         <div className="absolute inset-0">

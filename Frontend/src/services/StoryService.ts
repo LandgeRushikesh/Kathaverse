@@ -24,3 +24,14 @@ export const createStory = async (storyData: CreateStoryRequest) => {
     throw error;
   }
 };
+
+export const getStoryById = async (id: string) => {
+  try {
+    const res = await api.get(`/stories/${id}`);
+
+    return res.data;
+  } catch (error) {
+    console.error("Error Occurred:", error);
+    throw error;
+  }
+};

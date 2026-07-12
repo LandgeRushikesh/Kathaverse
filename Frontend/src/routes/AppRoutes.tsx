@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import StoryDetailPage from "../pages/StoryDetailPage";
 import MainLayout from "../components/layout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
@@ -20,6 +21,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="story/:id" element={<StoryDetailPage />} />
         <Route
           path="login"
           element={
