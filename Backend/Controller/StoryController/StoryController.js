@@ -102,9 +102,9 @@ export const getOneStory = asyncHandler(async (req, res) => {
 // @method POST
 // @access Private
 export const createStory = asyncHandler(async (req, res) => {
-    const { title, overview, content } = req.body
+    const { title, overview, content, category, coverImage } = req.body
 
-    if (!title || !overview || !content) {
+    if (!title || !overview || !content || !category || !coverImage) {
         res.status(400)
         throw new Error("Required all fields")
     }
@@ -115,6 +115,8 @@ export const createStory = asyncHandler(async (req, res) => {
         title,
         overview,
         content,
+        category,
+        coverImage,
         author: authorId
     })//if it fails it will directly throw an error so we don't need to check whether story is created or not
 
