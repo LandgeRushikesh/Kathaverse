@@ -13,7 +13,7 @@ export interface Story {
   isLiked: boolean;
   isFollowing: boolean;
   createdAt: string;
-  coverImage: null;
+  coverImage: string;
   category: string;
 }
 

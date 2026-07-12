@@ -49,13 +49,24 @@ const StoryCard = ({ story }: storyCardProps) => {
     <div className="bg-white rounded-lg shadow-md max-w-sm mx-auto hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full">
       {/* Cover Image */}
       <div className="relative overflow-hidden bg-gray-200">
-        <img
-          src={
-            story.coverImage || "https://wallpaperaccess.com/full/381000.jpg"
-          }
-          alt={story.title}
-          className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-        />
+        <div className="absolute inset-0">
+          <img
+            src={
+              story.coverImage || "https://wallpaperaccess.com/full/381000.jpg"
+            }
+            alt={story.title}
+            className="w-full h-full object-cover object-center opacity-30 blur-xs"
+          />
+        </div>
+        <div className="relative flex items-center justify-center h-48">
+          <img
+            src={
+              story.coverImage || "https://wallpaperaccess.com/full/381000.jpg"
+            }
+            alt={story.title}
+            className="max-w-full max-h-full object-contain object-center"
+          />
+        </div>
       </div>
 
       {/* Content Section */}
