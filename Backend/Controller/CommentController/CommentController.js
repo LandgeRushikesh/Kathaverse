@@ -55,16 +55,37 @@ export const getAllComments = asyncHandler(async (req, res) => {
 
     const story = await Story.exists({ _id: storyId })
 
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 5
+    const skip = (page - 1) * limit
+
     if (!story) {
         res.status(404)
         throw new Error("Story not found")
     }
 
-    const comments = await Comment.find({ story: storyId }).sort({ "createdAt": -1 }).populate("user", "name profilePicture")
+    const [comments, totalComments] = await Promise.all([
+        Comment.find({ story: storyId }).sort({ "createdAt": -1 }).skip(skip).limit(limit).populate("user", "name profilePicture").lean(),
+
+        Comment.countDocuments({
+            story: storyId
+        })
+    ])
+
+    const totalPages = Math.ceil(totalComments / limit)
+
+    const pagination = {
+        page,
+        limit,
+        total: totalComments,
+        totalPages
+    }
 
     res.status(200).json({
-        comments: comments,
-        totalComments: comments.length
+        success: true,
+        data: comments,
+        pagination: pagination
+
     })
 })
 
