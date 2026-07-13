@@ -4,17 +4,19 @@ import { Link, useParams } from "react-router-dom";
 import { getStoryById } from "../services/StoryService";
 import type { DetailedStoryContent } from "../Types/Story.ts";
 import type { CommentType } from "../Types/Comment.ts";
-import { fetchComments } from "../services/CommentService.ts";
+import { fetchComments, postComment } from "../services/CommentService.ts";
+import toast from "react-hot-toast";
 
 const StoryDetailPage = () => {
   const { id } = useParams();
   const [story, setStory] = useState<DetailedStoryContent | null>(null);
   const [comments, setComments] = useState<CommentType[] | null>(null);
+  const [userComment, setUserComment] = useState<string>("");
   const [currPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const limit: Number = 5;
+  const limit: number = 5;
 
   useEffect(() => {
     if (!id) {
@@ -47,6 +49,25 @@ const StoryDetailPage = () => {
       const res = await fetchComments(storyId, currPage, limit);
 
       setComments(res.data);
+    } catch (error) {
+      console.error("Error Occurred:", error);
+    }
+  };
+
+  const handlePostComment = async () => {
+    try {
+      if (!id) {
+        return;
+      }
+      if (!userComment.trim()) {
+        toast.error("Please add a comment");
+        return;
+      }
+      console.log(userComment);
+      await postComment(id, userComment);
+
+      setUserComment("");
+      getComments(id);
     } catch (error) {
       console.error("Error Occurred:", error);
     }
@@ -256,9 +277,14 @@ const StoryDetailPage = () => {
               <textarea
                 className="mt-4 h-28 w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                 placeholder="Share your thoughts..."
+                value={userComment}
+                onChange={(e) => setUserComment(e.target.value)}
               />
               <div className="mt-4 flex justify-end">
-                <button className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                <button
+                  className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  onClick={handlePostComment}
+                >
                   Post comment
                 </button>
               </div>
