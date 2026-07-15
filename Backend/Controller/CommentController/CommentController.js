@@ -89,7 +89,7 @@ export const getAllComments = asyncHandler(async (req, res) => {
     })
 })
 
-// @route DELETE /api/comment/:id
+// @route DELETE /api/comments/:id
 // @desc delete particular comment
 // @access Private
 
@@ -104,12 +104,18 @@ export const deleteComment = asyncHandler(async (req, res) => {
         res.status(404)
         throw new Error("Comment not found")
     }
+    const story = await Story.findById(comment.story).select("author")
 
+    if (!story) {
+        res.status(404);
+        throw new Error("Unable to perform this action.");
+    }
     // Check if user is allowed to delete this comment
-    if (comment.user.toString() !== userId.toString()) {
+    if (comment.user.toString() !== userId.toString() && story.author.toString() !== userId.toString()) {
         res.status(403)
         throw new Error("You are not allowed to delete this comment")
     }
+
 
     // Delete comment
     await Comment.findByIdAndDelete(commentId)

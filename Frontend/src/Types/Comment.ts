@@ -1,10 +1,10 @@
 interface User {
-  id: string;
+  _id: string;
   name: string;
   profilePicture: string;
 }
 export interface CommentType {
-  id: string;
+  _id: string;
   user: User;
   story: string;
   content: string;

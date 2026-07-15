@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { fetchComments, postComment } from "../../services/CommentService";
+import {
+  deleteComment,
+  fetchComments,
+  postComment,
+} from "../../services/CommentService";
 import type { CommentType } from "../../Types/Comment";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 interface CommentSectionProps {
   storyId: string;
+  AuthorId: string;
 }
-const CommentSection = ({ storyId }: CommentSectionProps) => {
+const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
   // i have to do this because props are passed as object so we to define its Type like this
-  const [comments, setComments] = useState<CommentType[] | null>(null);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [totalComments, setTotalComments] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
   const [currPage, setCurrPage] = useState<number>(1);
+  const { user } = useAuth();
   const limit: number = 5;
 
   // loading states
@@ -25,9 +32,16 @@ const CommentSection = ({ storyId }: CommentSectionProps) => {
 
   const getComments = async (storyId: string) => {
     try {
-      setLoading(true);
+      if (currPage == 1) {
+        setLoading(true);
+      }
       const res = await fetchComments(storyId, currPage, limit);
-      setComments((prev) => [...(prev ?? []), ...res.data]);
+
+      if (currPage == 1) {
+        setComments(res.data);
+      } else {
+        setComments((prev) => [...(prev ?? []), ...res.data]);
+      }
       setTotalComments(res.pagination.total);
       setTotalPages(res.pagination.totalPages);
     } catch (error) {
@@ -47,7 +61,11 @@ const CommentSection = ({ storyId }: CommentSectionProps) => {
       await postComment(storyId, userComment);
 
       setUserComment("");
-      await getComments(storyId);
+      if (currPage == 1) {
+        await getComments(storyId);
+      } else {
+        setCurrPage(1);
+      }
     } catch (error) {
       console.error("Error Occurred:", error);
     } finally {
@@ -57,9 +75,21 @@ const CommentSection = ({ storyId }: CommentSectionProps) => {
 
   const handleLoadMore = () => {
     if (currPage == totalPages) {
-      setTotalPages(currPage);
+      return;
     } else {
       setCurrPage(currPage + 1);
+    }
+  };
+
+  const handleDeleteComment = async (id: string) => {
+    try {
+      const res = await deleteComment(id);
+      toast.success("Comment deleted successfully");
+      setComments((prev) => prev.filter((comment) => comment._id != id));
+      setTotalComments(res.data.commentCount);
+    } catch (error) {
+      console.error("Error Occurred:", error);
+      toast.error("Error while deleting a story");
     }
   };
 
@@ -95,39 +125,77 @@ const CommentSection = ({ storyId }: CommentSectionProps) => {
               <div className="mt-4 h-12 w-full rounded bg-slate-200" />
             </div>
           ))
-        ) : comments && comments.length > 0 ? (
+        ) : comments.length > 0 ? (
           comments.map((comment) => (
             <article
-              key={comment.id}
+              key={comment._id}
               className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
             >
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-300 text-sm font-semibold uppercase text-slate-700">
-                  {comment.user?.profilePicture ? (
-                    <img
-                      src={comment.user.profilePicture}
-                      alt={comment.user.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span>
-                      {comment.user?.name
-                        ?.split(" ")
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((word) => word[0])
-                        .join("")
-                        .toUpperCase() || "U"}
-                    </span>
-                  )}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-300 text-sm font-semibold uppercase text-slate-700">
+                    {comment.user?.profilePicture ? (
+                      <img
+                        src={comment.user.profilePicture}
+                        alt={comment.user.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span>
+                        {comment.user?.name
+                          ?.split(" ")
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((word) => word[0])
+                          .join("")
+                          .toUpperCase() || "U"}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {comment.user?.name || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    {comment.user?.name || "Anonymous"}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </p>
+
+                {/* Edit and Delete Buttons */}
+                <div className="flex items-center gap-2">
+                  {user?._id == comment.user._id && (
+                    <button className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer">
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                  )}
+                  {(user?._id === comment.user._id ||
+                    user?._id == AuthorId) && (
+                    <button
+                      className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-red-600 cursor-pointer"
+                      onClick={() => handleDeleteComment(comment._id)}
+                    >
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-700">
@@ -148,28 +216,30 @@ const CommentSection = ({ storyId }: CommentSectionProps) => {
       </div>
 
       {/* Load more*/}
-      <div className="mt-6 flex justify-center">
-        <div
-          aria-hidden
-          className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer"
-          onClick={handleLoadMore}
-        >
-          <span>Load more comments</span>
-          <svg
-            className="h-4 w-4 text-slate-400"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+      {currPage < totalPages && (
+        <div className="mt-6 flex justify-center">
+          <div
             aria-hidden
+            className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer"
+            onClick={handleLoadMore}
           >
-            <path
-              fillRule="evenodd"
-              d="M7.21 14.78a.75.75 0 001.06 0L13 10.06a.75.75 0 000-1.06L8.27 4.29a.75.75 0 10-1.06 1.06L11.44 9.5 7.21 13.72a.75.75 0 000 1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+            <span>Load more comments</span>
+            <svg
+              className="h-4 w-4 text-slate-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.21 14.78a.75.75 0 001.06 0L13 10.06a.75.75 0 000-1.06L8.27 4.29a.75.75 0 10-1.06 1.06L11.44 9.5 7.21 13.72a.75.75 0 000 1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
         <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">

@@ -27,3 +27,14 @@ export const postComment = async (id: string, content: string) => {
     throw error;
   }
 };
+
+export const deleteComment = async (id: string) => {
+  try {
+    const res = await api.delete(`/comments/${id}`);
+
+    return res;
+  } catch (error) {
+    console.error("Error Occurred:", error);
+    throw error;
+  }
+};

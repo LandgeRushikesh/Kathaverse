@@ -166,7 +166,7 @@ const StoryDetailPage = () => {
 
           {/* Comment Section */}
           <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            {id && <CommentSection storyId={id} />}
+            {id && <CommentSection storyId={id} AuthorId={story.author._id} />}
           </section>
         </main>
 
