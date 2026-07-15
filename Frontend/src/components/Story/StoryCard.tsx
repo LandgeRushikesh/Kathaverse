@@ -14,7 +14,8 @@ const StoryCard = ({ story }: storyCardProps) => {
   const [likeCount, setLikeCount] = useState<number>(story.likeCount);
   const [isLiking, setIsLiking] = useState<boolean>(false);
 
-  const handleLike = async () => {
+  const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setIsLiking(true);
     const id = story._id;
     // Previous state
