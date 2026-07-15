@@ -1,22 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import { getStoryById } from "../services/StoryService";
 import type { DetailedStoryContent } from "../Types/Story.ts";
-import type { CommentType } from "../Types/Comment.ts";
-import { fetchComments, postComment } from "../services/CommentService.ts";
-import toast from "react-hot-toast";
+import CommentSection from "../components/Comments/CommentSection.tsx";
 
 const StoryDetailPage = () => {
   const { id } = useParams();
   const [story, setStory] = useState<DetailedStoryContent | null>(null);
-  const [comments, setComments] = useState<CommentType[] | null>(null);
-  const [userComment, setUserComment] = useState<string>("");
-  const [currPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  const limit: number = 5;
 
   useEffect(() => {
     if (!id) {
@@ -26,7 +18,6 @@ const StoryDetailPage = () => {
     }
 
     fetchStory(id);
-    getComments(id);
   }, [id]);
 
   const fetchStory = async (storyId: string) => {
@@ -41,35 +32,6 @@ const StoryDetailPage = () => {
       setError("Unable to load the story. Please try again later.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getComments = async (storyId: string) => {
-    try {
-      const res = await fetchComments(storyId, currPage, limit);
-
-      setComments(res.data);
-    } catch (error) {
-      console.error("Error Occurred:", error);
-    }
-  };
-
-  const handlePostComment = async () => {
-    try {
-      if (!id) {
-        return;
-      }
-      if (!userComment.trim()) {
-        toast.error("Please add a comment");
-        return;
-      }
-      console.log(userComment);
-      await postComment(id, userComment);
-
-      setUserComment("");
-      getComments(id);
-    } catch (error) {
-      console.error("Error Occurred:", error);
     }
   };
 
@@ -202,93 +164,9 @@ const StoryDetailPage = () => {
             </div>
           </section>
 
+          {/* Comment Section */}
           <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">
-                  Comments
-                </h2>
-                <p className="text-sm text-slate-500">
-                  See what readers are saying about this story.
-                </p>
-              </div>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-                {story.commentCount} responses
-              </span>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              {comments && comments.length > 0 ? (
-                comments.map((comment) => (
-                  <article
-                    key={comment.id}
-                    className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-300 text-sm font-semibold uppercase text-slate-700">
-                        {comment.user?.profilePicture ? (
-                          <img
-                            src={comment.user.profilePicture}
-                            alt={comment.user.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span>
-                            {comment.user?.name
-                              ?.split(" ")
-                              .filter(Boolean)
-                              .slice(0, 2)
-                              .map((word) => word[0])
-                              .join("")
-                              .toUpperCase() || "U"}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          {comment.user?.name || "Anonymous"}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(comment.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm leading-6 text-slate-700">
-                      {comment.content}
-                    </p>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                  <p className="text-sm font-semibold text-slate-900">
-                    No comments yet
-                  </p>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Be the first to share your thoughts about this story.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-                Add a comment
-              </h3>
-              <textarea
-                className="mt-4 h-28 w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
-                placeholder="Share your thoughts..."
-                value={userComment}
-                onChange={(e) => setUserComment(e.target.value)}
-              />
-              <div className="mt-4 flex justify-end">
-                <button
-                  className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                  onClick={handlePostComment}
-                >
-                  Post comment
-                </button>
-              </div>
-            </div>
+            {id && <CommentSection storyId={id} />}
           </section>
         </main>
 
