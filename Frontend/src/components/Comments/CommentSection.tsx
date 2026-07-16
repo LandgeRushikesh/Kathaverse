@@ -10,12 +10,18 @@ import { useAuth } from "../../context/AuthContext";
 
 interface CommentSectionProps {
   storyId: string;
-  AuthorId: string;
+  authorId: string;
+  updateCommentCount: (count: number) => void;
+  commentCount: number;
 }
-const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
+const CommentSection = ({
+  storyId,
+  authorId,
+  updateCommentCount,
+  commentCount,
+}: CommentSectionProps) => {
   // i have to do this because props are passed as object so we to define its Type like this
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [totalComments, setTotalComments] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
   const [currPage, setCurrPage] = useState<number>(1);
@@ -32,17 +38,16 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
 
   const getComments = async (storyId: string) => {
     try {
-      if (currPage == 1) {
+      if (currPage === 1) {
         setLoading(true);
       }
       const res = await fetchComments(storyId, currPage, limit);
 
-      if (currPage == 1) {
+      if (currPage === 1) {
         setComments(res.data);
       } else {
-        setComments((prev) => [...(prev ?? []), ...res.data]);
+        setComments((prev) => [...prev, ...res.data]);
       }
-      setTotalComments(res.pagination.total);
       setTotalPages(res.pagination.totalPages);
     } catch (error) {
       console.error("Error Occurred:", error);
@@ -58,12 +63,14 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
         return;
       }
       setPosting(true);
-      await postComment(storyId, userComment);
+      const res = await postComment(storyId, userComment);
+      updateCommentCount(res.data.commentCount);
 
       setUserComment("");
-      if (currPage == 1) {
+      if (currPage === 1) {
         await getComments(storyId);
       } else {
+        setComments([]);
         setCurrPage(1);
       }
     } catch (error) {
@@ -74,22 +81,21 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
   };
 
   const handleLoadMore = () => {
-    if (currPage == totalPages) {
+    if (currPage === totalPages) {
       return;
-    } else {
-      setCurrPage(currPage + 1);
     }
+    setCurrPage((prev) => prev + 1);
   };
 
   const handleDeleteComment = async (id: string) => {
     try {
       const res = await deleteComment(id);
       toast.success("Comment deleted successfully");
-      setComments((prev) => prev.filter((comment) => comment._id != id));
-      setTotalComments(res.data.commentCount);
+      setComments((prev) => prev.filter((comment) => comment._id !== id));
+      updateCommentCount(res.data.commentCount);
     } catch (error) {
       console.error("Error Occurred:", error);
-      toast.error("Error while deleting a story");
+      toast.error("Error while deleting a comment");
     }
   };
 
@@ -103,7 +109,7 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
           </p>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
-          {totalComments} responses
+          {commentCount} responses
         </span>
       </div>
 
@@ -164,7 +170,7 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
 
                 {/* Edit and Delete Buttons */}
                 <div className="flex items-center gap-2">
-                  {user?._id == comment.user._id && (
+                  {user?._id === comment.user._id && (
                     <button className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer">
                       <svg
                         className="h-5 w-5"
@@ -177,7 +183,7 @@ const CommentSection = ({ storyId, AuthorId }: CommentSectionProps) => {
                     </button>
                   )}
                   {(user?._id === comment.user._id ||
-                    user?._id == AuthorId) && (
+                    user?._id === authorId) && (
                     <button
                       className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-red-600 cursor-pointer"
                       onClick={() => handleDeleteComment(comment._id)}

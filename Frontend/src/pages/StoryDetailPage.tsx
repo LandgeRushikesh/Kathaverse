@@ -35,6 +35,18 @@ const StoryDetailPage = () => {
     }
   };
 
+  const updateCommentCount = (count: number) => {
+    setStory((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        commentCount: count,
+      };
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
@@ -166,7 +178,14 @@ const StoryDetailPage = () => {
 
           {/* Comment Section */}
           <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            {id && <CommentSection storyId={id} AuthorId={story.author._id} />}
+            {id && (
+              <CommentSection
+                storyId={id}
+                authorId={story.author._id}
+                updateCommentCount={updateCommentCount}
+                commentCount={story.commentCount}
+              />
+            )}
           </section>
         </main>
 

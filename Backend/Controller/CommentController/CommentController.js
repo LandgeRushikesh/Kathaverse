@@ -118,9 +118,9 @@ export const deleteComment = asyncHandler(async (req, res) => {
 
 
     // Delete comment
-    await Comment.findByIdAndDelete(commentId)
+    // await Comment.findByIdAndDelete(commentId)
     // as we have already fetch the comment we can also do like below
-    // await comment.deleteOne()
+    await comment.deleteOne()
 
     // update comment count in  story
     const updatedStory = await Story.findByIdAndUpdate(
