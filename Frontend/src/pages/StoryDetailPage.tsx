@@ -3,12 +3,19 @@ import { Link, useParams } from "react-router-dom";
 import { getStoryById } from "../services/StoryService";
 import type { DetailedStoryContent } from "../Types/Story.ts";
 import CommentSection from "../components/Comments/CommentSection.tsx";
+import useLike from "../hooks/useLike.ts";
 
 const StoryDetailPage = () => {
   const { id } = useParams();
   const [story, setStory] = useState<DetailedStoryContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { isLiked, likeCount, isLiking, handleLike } = useLike(
+    story?._id ?? "",
+    story?.isLiked ?? false,
+    story?.likeCount ?? 0,
+  );
 
   useEffect(() => {
     if (!id) {
@@ -143,15 +150,31 @@ const StoryDetailPage = () => {
           <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700">
-                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                    {story.likeCount} {story.likeCount > 1 ? "likes" : "like"}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700">
-                    <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
-                    {story.commentCount}{" "}
-                    {story.commentCount > 1 ? "comments" : "comment"}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 cursor-pointer"
+                    onClick={handleLike}
+                    disabled={isLiking}
+                  >
+                    <span
+                      className={`text-base ${
+                        isLiked ? "text-rose-500" : "text-slate-500"
+                      }`}
+                    >
+                      {isLiked ? "♥" : "♡"}
+                    </span>
+                    <span>
+                      {likeCount} {likeCount > 1 ? "Likes" : "Like"}
+                    </span>
+                  </button>
+
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 cursor-pointer">
+                    <span className="text-sky-700">💬</span>
+                    <span>
+                      {story.commentCount}{" "}
+                      {story.commentCount > 1 ? "comments" : "comment"}
+                    </span>
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">
@@ -161,14 +184,6 @@ const StoryDetailPage = () => {
                   </span>{" "}
                   • {new Date(story.createdAt).toLocaleDateString()}
                 </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button className="inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-600">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-rose-500">
-                    ♥
-                  </span>
-                  {story.isLiked ? "Liked" : "Like"}
-                </button>
               </div>
             </div>
 
@@ -242,7 +257,7 @@ const StoryDetailPage = () => {
               <li className="flex items-center justify-between">
                 <span>Likes</span>
                 <span className="font-semibold text-slate-900">
-                  {story.likeCount}
+                  {likeCount}
                 </span>
               </li>
               <li className="flex items-center justify-between">

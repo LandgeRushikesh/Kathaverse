@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import type { Story } from "../../Types/Story";
-import { toggleLike } from "../../services/LikeService";
 import { useNavigate } from "react-router-dom";
+import useLike from "../../hooks/useLike";
 
 interface storyCardProps {
   story: Story;
@@ -10,44 +9,16 @@ interface storyCardProps {
 const StoryCard = ({ story }: storyCardProps) => {
   const navigate = useNavigate();
 
-  const [isLiked, setIsLiked] = useState<boolean>(story.isLiked);
-  const [likeCount, setLikeCount] = useState<number>(story.likeCount);
-  const [isLiking, setIsLiking] = useState<boolean>(false);
+  const { isLiked, likeCount, isLiking, handleLike } = useLike(
+    story._id,
+    story.isLiked,
+    story.likeCount,
+  );
 
-  const handleLike = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleLikeClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    setIsLiking(true);
-    const id = story._id;
-    // Previous state
-    const prevLiked: boolean = isLiked;
-    const prevCount: number = likeCount;
-    // Toggle like
-    setIsLiked((prevIsLiked) => {
-      const newIsLiked = !prevIsLiked;
-      setLikeCount((prevCount) => (newIsLiked ? prevCount + 1 : prevCount - 1));
-
-      return newIsLiked;
-    });
-
-    try {
-      const res = await toggleLike(id);
-
-      setIsLiked(res.isLiked);
-      setLikeCount(res.likeCount);
-    } catch (error) {
-      console.error("Failed to like:", error);
-      setIsLiked(prevLiked);
-      setLikeCount(prevCount);
-    } finally {
-      setIsLiking(false);
-    }
+    await handleLike();
   };
-
-  // this is for when prop will change as react doesn't reinitialized states when re-rendered
-  useEffect(() => {
-    setIsLiked(story.isLiked);
-    setLikeCount(story.likeCount);
-  }, [story.isLiked, story.likeCount]);
 
   const handleNavigation = (id: string) => {
     navigate(`/story/${id}`);
@@ -103,7 +74,7 @@ const StoryCard = ({ story }: storyCardProps) => {
           <div className="flex items-center justify-between">
             {/* Like Button & Count */}
             <button
-              onClick={handleLike}
+              onClick={handleLikeClick}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-red-50 active:scale-95 ${isLiking ? "cursor-not-allowed" : "cursor-pointer"}`}
               aria-label={isLiked ? "Unlike story" : "Like story"}
               disabled={isLiking}
