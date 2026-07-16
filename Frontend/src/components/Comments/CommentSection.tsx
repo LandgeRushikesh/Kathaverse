@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   deleteComment,
+  editComment,
   fetchComments,
   postComment,
 } from "../../services/CommentService";
@@ -24,7 +25,11 @@ const CommentSection = ({
   const [comments, setComments] = useState<CommentType[]>([]);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [userComment, setUserComment] = useState<string>("");
+  const [editedCommentContent, setEditedCommentContent] = useState<string>("");
   const [currPage, setCurrPage] = useState<number>(1);
+  const [editableCommentId, setEditableCommentId] = useState<string | null>(
+    null,
+  );
   const { user } = useAuth();
   const limit: number = 5;
 
@@ -93,9 +98,46 @@ const CommentSection = ({
       toast.success("Comment deleted successfully");
       setComments((prev) => prev.filter((comment) => comment._id !== id));
       updateCommentCount(res.data.commentCount);
+      // if comment is deleted while editing
+      if (id === editableCommentId) {
+        setEditableCommentId(null);
+        setEditedCommentContent("");
+      }
     } catch (error) {
       console.error("Error Occurred:", error);
       toast.error("Error while deleting a comment");
+    }
+  };
+
+  const handleEdit = (id: string, originalContent: string) => {
+    setEditableCommentId(id);
+    setEditedCommentContent(originalContent);
+  };
+
+  const handleEditComment = async (id: string, originalContent: string) => {
+    try {
+      if (!editedCommentContent?.trim()) {
+        toast.error("Comment cannot be empty.");
+        return;
+      }
+      if (originalContent.trim() === editedCommentContent.trim()) {
+        setEditableCommentId(null);
+        setEditedCommentContent("");
+        return;
+      }
+
+      const updatedComment = await editComment(id, editedCommentContent);
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === updatedComment._id ? updatedComment : comment,
+        ),
+      );
+
+      setEditableCommentId(null);
+      setEditedCommentContent("");
+    } catch (error) {
+      console.error("Error Occurred:", error);
+      toast.error("Error while updating a comment");
     }
   };
 
@@ -170,18 +212,22 @@ const CommentSection = ({
 
                 {/* Edit and Delete Buttons */}
                 <div className="flex items-center gap-2">
-                  {user?._id === comment.user._id && (
-                    <button className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer">
-                      <svg
-                        className="h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                  {editableCommentId !== comment._id &&
+                    user?._id === comment.user._id && (
+                      <button
+                        className="rounded-full p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700 cursor-pointer"
+                        onClick={() => handleEdit(comment._id, comment.content)}
                       >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </button>
-                  )}
+                        <svg
+                          className="h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                    )}
                   {(user?._id === comment.user._id ||
                     user?._id === authorId) && (
                     <button
@@ -204,9 +250,34 @@ const CommentSection = ({
                   )}
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-6 text-slate-700">
-                {comment.content}
-              </p>
+              {editableCommentId === comment._id ? (
+                <div className="mt-4">
+                  <textarea
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                    aria-label="Edit comment"
+                    value={editedCommentContent}
+                    onChange={(e) => setEditedCommentContent(e.target.value)}
+                    autoFocus
+                  />
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                      type="button"
+                      aria-label="Post updated comment"
+                      onClick={() =>
+                        handleEditComment(editableCommentId, comment.content)
+                      }
+                    >
+                      Update
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm leading-6 text-slate-700 whitespace-pre-wrap">
+                  {comment.content}
+                </p>
+              )}
             </article>
           ))
         ) : (

@@ -167,7 +167,7 @@ export const updateComment = asyncHandler(async (req, res) => {
         commentId,
         { content: content },
         { returnDocument: "after" }
-    )
+    ).populate("user", "name profilePicture");
 
     res.status(200).json(updatedComment)
 })

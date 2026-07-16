@@ -10,3 +10,49 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Make comment textarea appear like plain text when not editable,
+   and clearly editable (with focus styles) when enabled. Scoped
+   to the textarea variant used in CommentSection (w-full + rounded-2xl). */
+textarea.w-full.rounded-2xl[disabled] {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-top: 0.5rem;
+  color: #0f172a; /* slate-900 */
+  font-size: 0.9375rem; /* match text-sm */
+  line-height: 1.5;
+  resize: none;
+  box-shadow: none !important;
+  outline: none !important;
+  cursor: text;
+  white-space: pre-wrap;
+}
+
+/* Editable appearance */
+textarea.w-full.rounded-2xl:not([disabled]) {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1; /* slate-300 */
+  padding: 0.75rem 1rem;
+  color: #0f172a;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+textarea.w-full.rounded-2xl:not([disabled]):focus {
+  border-color: #0f172a; /* darker slate */
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  outline: none;
+}
+
+/* When disabled, ensure nearby actions (Update button) are hidden by default
+   — component logic controls visibility; this only affects visual spacing. */
+textarea.w-full.rounded-2xl[disabled] + .mt-3,
+textarea.w-full.rounded-2xl[disabled] + .mt-3 + * {
+  display: none !important;
+}

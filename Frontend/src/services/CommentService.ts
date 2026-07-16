@@ -38,3 +38,16 @@ export const deleteComment = async (id: string) => {
     throw error;
   }
 };
+
+export const editComment = async (id: string, content: string) => {
+  try {
+    const res = await api.put(`/comments/${id}`, {
+      content,
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("Error Occurred:", error);
+    throw error;
+  }
+};
