@@ -146,11 +146,12 @@ const StoryDetailPage = () => {
                 <div className="flex flex-wrap gap-3">
                   <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700">
                     <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-                    {story.likeCount} likes
+                    {story.likeCount} {story.likeCount > 1 ? "likes" : "like"}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700">
                     <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
-                    {story.commentCount} comments
+                    {story.commentCount}{" "}
+                    {story.commentCount > 1 ? "comments" : "comment"}
                   </span>
                 </div>
                 <p className="text-sm text-slate-500">
