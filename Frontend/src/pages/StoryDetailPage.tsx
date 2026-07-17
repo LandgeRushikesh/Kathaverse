@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getStoryById } from "../services/StoryService";
 import type { DetailedStoryContent } from "../Types/Story.ts";
@@ -16,6 +16,8 @@ const StoryDetailPage = () => {
     story?.isLiked ?? false,
     story?.likeCount ?? 0,
   );
+
+  const commentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) {
@@ -51,6 +53,13 @@ const StoryDetailPage = () => {
         ...prev,
         commentCount: count,
       };
+    });
+  };
+
+  const handleScrollComment = () => {
+    commentRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -169,13 +178,16 @@ const StoryDetailPage = () => {
                     </span>
                   </button>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 cursor-pointer">
+                  <button
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 cursor-pointer"
+                    onClick={handleScrollComment}
+                  >
                     <span className="text-sky-700">💬</span>
                     <span>
                       {story.commentCount}{" "}
                       {story.commentCount > 1 ? "comments" : "comment"}
                     </span>
-                  </span>
+                  </button>
                 </div>
                 <p className="text-sm text-slate-500">
                   Published by{" "}
@@ -193,7 +205,10 @@ const StoryDetailPage = () => {
           </section>
 
           {/* Comment Section */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+          <section
+            ref={commentRef}
+            className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+          >
             {id && (
               <CommentSection
                 storyId={id}
