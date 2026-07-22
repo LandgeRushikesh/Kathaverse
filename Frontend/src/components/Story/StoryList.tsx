@@ -7,7 +7,7 @@ interface StoryListProps {
 
 const StoryList = ({ stories }: StoryListProps) => {
   return (
-    <div className="flex flex-col space-y-6 max-w-md mx-auto">
+    <div className="flex flex-col space-y-6 w-full">
       {stories.map((story) => (
         <StoryCard key={story._id} story={story} />
       ))}

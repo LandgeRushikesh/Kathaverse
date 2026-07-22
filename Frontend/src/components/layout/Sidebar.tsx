@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   HiHome,
   HiPlusCircle,
@@ -34,6 +34,8 @@ const Sidebar = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
 
+  const navigate = useNavigate();
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -41,6 +43,13 @@ const Sidebar = () => {
         .join("")
         .slice(0, 2)
     : "KV";
+
+  const handleClick = () => {
+    if (user?._id) {
+      console.log("I am here");
+      navigate(`/users/${user?._id}`);
+    }
+  };
 
   return (
     <aside className="w-64 h-screen shrink-0 border-r border-gray-200 bg-white flex flex-col">
@@ -70,7 +79,10 @@ const Sidebar = () => {
       <div className="border-t border-gray-200 px-5 py-4">
         {isAuthenticated ? (
           <>
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={handleClick}
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-base font-semibold text-white">
                 {initials}
               </div>

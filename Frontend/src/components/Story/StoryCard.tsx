@@ -27,7 +27,7 @@ const StoryCard = ({ story }: storyCardProps) => {
   return (
     <div
       onClick={() => handleNavigation(story._id)}
-      className="bg-white rounded-lg shadow-md max-w-sm mx-auto hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
+      className="bg-white rounded-lg shadow-md w-full hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col h-full cursor-pointer"
     >
       {/* Cover Image */}
       <div className="relative overflow-hidden bg-gray-200">
@@ -40,7 +40,7 @@ const StoryCard = ({ story }: storyCardProps) => {
             className="w-full h-full object-cover object-center opacity-30 blur-xs"
           />
         </div>
-        <div className="relative flex items-center justify-center h-48">
+        <div className="relative flex items-center justify-center h-56">
           <img
             src={
               story.coverImage || "https://wallpaperaccess.com/full/381000.jpg"
@@ -75,7 +75,7 @@ const StoryCard = ({ story }: storyCardProps) => {
             {/* Like Button & Count */}
             <button
               onClick={handleLikeClick}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-red-50 active:scale-95 ${isLiking ? "cursor-not-allowed" : "cursor-pointer"}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:bg-red-50 active:scale-95 ${isLiking ? "cursor-not-allowed" : "cursor-pointerhover:text-red-500"}`}
               aria-label={isLiked ? "Unlike story" : "Like story"}
               disabled={isLiking}
             >
@@ -126,27 +126,6 @@ const StoryCard = ({ story }: storyCardProps) => {
                     strokeLinejoin="round"
                     strokeWidth={2}
                     d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                  />
-                </svg>
-              </button>
-
-              {/* Share Icon */}
-              <button
-                className="p-2 rounded-lg hover:bg-green-50 transition-colors text-gray-400 hover:text-green-500"
-                aria-label="Share story"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.684 13.342C9.577 14.714 10.685 15.881 11.997 16.714m0 0c1.312-.834 2.42-2.001 3.313-3.372m-9.573-2.16a9.003 9.003 0 019.573-2.16m0 0a8.968 8.968 0 013.313 3.372m-9.573 2.16l-3.066-3.066a9 9 0 1312.728 0l-3.066 3.066m0 0l3.066 3.066"
                   />
                 </svg>
               </button>

@@ -11,7 +11,7 @@ const MainLayout = () => {
         <div className="flex flex-1 flex-col min-h-0">
           <LayoutHeader />
 
-          <main className="hide-scrollbar flex-1 min-h-0 overflow-y-auto p-6">
+          <main className="flex-1 min-h-0 p-6">
             <Outlet />
           </main>
         </div>

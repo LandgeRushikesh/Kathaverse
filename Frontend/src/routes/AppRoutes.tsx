@@ -7,6 +7,7 @@ import MainLayout from "../components/layout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import CreateStoryPage from "../pages/CreateStoryPage";
+import ProfilePage from "../pages/ProfilePage";
 
 const AppRoutes = () => {
   return (
@@ -36,6 +37,14 @@ const AppRoutes = () => {
             <PublicRoute>
               <RegisterPage />
             </PublicRoute>
+          }
+        />
+        <Route
+          path="users/:id"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
           }
         />
       </Route>
