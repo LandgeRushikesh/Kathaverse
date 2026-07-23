@@ -4,11 +4,16 @@ import { HiOutlineMail } from "react-icons/hi";
 import { useParams } from "react-router-dom";
 import { getUserProfile } from "../services/ProfileService";
 import type { profileType } from "../Types/Profile.ts";
+import { useAuth } from "../context/AuthContext.tsx";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState<profileType | null>(null);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const { id } = useParams();
+
+  const { user } = useAuth();
+
+  const isLoggedInUser: boolean = user?._id === id;
 
   const profileName = profile?.name || "User";
   const profileUsername = profile?.email ? profile.email.split("@")[0] : "user";
@@ -76,19 +81,22 @@ const ProfilePage = () => {
               </div>
 
               <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                <button
-                  onClick={handleFollowToggle}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    isFollowing
-                      ? "bg-slate-900 text-white hover:bg-slate-800"
-                      : "bg-sky-500 text-white hover:bg-sky-600"
-                  }`}
-                >
-                  {isFollowing ? "Following" : "Follow"}
-                </button>
-                <button className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                  Edit profile
-                </button>
+                {isLoggedInUser ? (
+                  <button className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    Edit profile
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleFollowToggle}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      isFollowing
+                        ? "bg-slate-900 text-white hover:bg-slate-800"
+                        : "bg-sky-500 text-white hover:bg-sky-600"
+                    }`}
+                  >
+                    {isFollowing ? "Following" : "Follow"}
+                  </button>
+                )}
               </div>
             </div>
 
