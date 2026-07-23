@@ -40,7 +40,7 @@ const StoryCard = ({ story }: storyCardProps) => {
             className="w-full h-full object-cover object-center opacity-30 blur-xs"
           />
         </div>
-        <div className="relative flex items-center justify-center h-56">
+        <div className="relative flex items-center justify-center h-48">
           <img
             src={
               story.coverImage || "https://wallpaperaccess.com/full/381000.jpg"

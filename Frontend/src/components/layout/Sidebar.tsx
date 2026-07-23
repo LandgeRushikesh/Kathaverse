@@ -46,7 +46,6 @@ const Sidebar = () => {
 
   const handleClick = () => {
     if (user?._id) {
-      console.log("I am here");
       navigate(`/users/${user?._id}`);
     }
   };

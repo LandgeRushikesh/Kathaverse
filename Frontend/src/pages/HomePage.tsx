@@ -139,7 +139,7 @@ const HomePage = () => {
                   >
                     <div className="flex items-start gap-3">
                       <div className="shrink-0 w-10 flex items-start justify-center">
-                        <div className="text-3xl leading-none font-semibold text-slate-500 opacity-80">
+                        <div className="text-3xl leading-none font-bold text-slate-300 opacity-80">
                           {String(idx + 1).padStart(2, "0")}
                         </div>
                       </div>

@@ -16,7 +16,7 @@ export const getProfile = asyncHandler(async (req, res) => {
         throw new Error("Invalid user ID")
     }
 
-    const profile = await User.findById(userId).select("name profilePicture bio followerCount followingCount createdAt").lean()//using lean() this will convert it into plain JS object from mongoDB object
+    const profile = await User.findById(userId).select("name email profilePicture bio followerCount followingCount createdAt").lean()//using lean() this will convert it into plain JS object from mongoDB object
     /* this is a mongoDB object it is not a plain JS Object so below what i am trying profile.totalStories = totalStories is not possible to add new fileds in this object we need convert this mongoDB object to JS Plain Object
     to do so we have 2 options 
     1. profileObj = profile.toObject()
